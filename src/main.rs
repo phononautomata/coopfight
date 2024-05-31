@@ -42,9 +42,9 @@ pub struct Args {
     pub parameter_technology: f64,
     #[clap(long, value_parser, default_value_t = 1.0)]
     pub payoff_cooperation: f64,
-    #[clap(long, value_parser, default_value_t = 1.0)]
+    #[clap(long, value_parser, default_value_t = 1.2)]
     pub payoff_defection: f64,
-    #[clap(long, value_parser, default_value_t = 0.0)]
+    #[clap(long, value_parser, default_value_t = 0.1)]
     pub rate_consumption: f64,
     #[clap(long, value_parser, default_value = "net_adl_lpb_nx100_ny100")]
     pub string_network: String,

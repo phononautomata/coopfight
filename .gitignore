@@ -1,5 +1,6 @@
 .coopfight
 .pickle
 results/curated
-doc
-data
+doc/
+data/
+target/
