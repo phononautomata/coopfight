@@ -1,0 +1,11 @@
+/Users/alfonso/workshop/coopfight/target/debug/deps/libserde_pickle-275255b740ceea68.rmeta: /Users/alfonso/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-pickle-1.1.1/src/lib.rs /Users/alfonso/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-pickle-1.1.1/src/ser.rs /Users/alfonso/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-pickle-1.1.1/src/de.rs /Users/alfonso/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-pickle-1.1.1/src/error.rs /Users/alfonso/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-pickle-1.1.1/src/value.rs /Users/alfonso/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-pickle-1.1.1/src/consts.rs /Users/alfonso/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-pickle-1.1.1/src/value_impls.rs
+
+/Users/alfonso/workshop/coopfight/target/debug/deps/serde_pickle-275255b740ceea68.d: /Users/alfonso/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-pickle-1.1.1/src/lib.rs /Users/alfonso/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-pickle-1.1.1/src/ser.rs /Users/alfonso/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-pickle-1.1.1/src/de.rs /Users/alfonso/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-pickle-1.1.1/src/error.rs /Users/alfonso/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-pickle-1.1.1/src/value.rs /Users/alfonso/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-pickle-1.1.1/src/consts.rs /Users/alfonso/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-pickle-1.1.1/src/value_impls.rs
+
+/Users/alfonso/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-pickle-1.1.1/src/lib.rs:
+/Users/alfonso/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-pickle-1.1.1/src/ser.rs:
+/Users/alfonso/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-pickle-1.1.1/src/de.rs:
+/Users/alfonso/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-pickle-1.1.1/src/error.rs:
+/Users/alfonso/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-pickle-1.1.1/src/value.rs:
+/Users/alfonso/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-pickle-1.1.1/src/consts.rs:
+/Users/alfonso/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-pickle-1.1.1/src/value_impls.rs:
