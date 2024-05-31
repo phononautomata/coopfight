@@ -1,6 +1,12 @@
 use csv::Writer;
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, error::Error, fs::{File, OpenOptions}, io::{Read, Write}, path::{Path, PathBuf}};
+use std::{
+    collections::HashMap,
+    error::Error,
+    fs::{File, OpenOptions},
+    io::{Read, Write},
+    path::{Path, PathBuf},
+};
 use uuid::Uuid;
 
 use crate::agent::{ResourceDistributionModel, Strategy};
@@ -87,14 +93,14 @@ pub fn assemble_events(output_ensemble: &Vec<Output>) -> Vec<&Vec<FightingEvent>
             event_ensemble.push(events);
         }
     }
-    
+
     event_ensemble
 }
 
 pub fn construct_string_game(pars_input: &Input) -> String {
     format!(
         "fc{}_fd{}_fi{}_mdr{}_ns{}_noi{}_tec{}_pd{}_rc{}_ta{}_te{}",
-        pars_input.fraction_cooperators, 
+        pars_input.fraction_cooperators,
         pars_input.fraction_defectors,
         pars_input.fraction_investment,
         pars_input.model_distribution_resources,
@@ -134,11 +140,13 @@ pub fn convert_string_to_location_seed_enum(
 
 pub fn load_network(path_network: &PathBuf) -> HashMap<usize, Vec<usize>> {
     let mut file = File::open(&path_network).expect("Failed to open file");
-    
-    let mut content = String::new();
-    file.read_to_string(&mut content).expect("Failed to read file");
 
-    let adjcency_list: HashMap<usize, Vec<usize>> = serde_json::from_str(&content).expect("Failed to deserialize JSON");
+    let mut content = String::new();
+    file.read_to_string(&mut content)
+        .expect("Failed to read file");
+
+    let adjcency_list: HashMap<usize, Vec<usize>> =
+        serde_json::from_str(&content).expect("Failed to deserialize JSON");
 
     adjcency_list
 }
@@ -151,8 +159,8 @@ pub fn save_to_json<T: Serialize>(data: &T, path: &PathBuf) -> Result<(), Box<dy
 }
 
 pub fn save_global_results(
-    output_global: &OutputGlobal, 
-    pars_input: &Input, 
+    output_global: &OutputGlobal,
+    pars_input: &Input,
     path: &str,
     nagents: usize,
 ) -> Result<(), Box<dyn Error>> {

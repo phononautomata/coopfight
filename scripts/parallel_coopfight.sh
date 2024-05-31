@@ -3,12 +3,17 @@
 base_path=$(cd "$(dirname "$0")"/.. && pwd)
 script_folder="scripts"
 
+source "${base_path}/.coopfight/bin/activate.fish"
+
 network_list=()
+
+id_network="LatticePBC"
+id_format="adjacency-list"
 
 while IFS= read -r line; do
     network_list+=("$line")
     #echo "Debug UUID: $line"
-done < <(python3 "${base_path}/${script_folder}/collect_networks.py")
+done < <(python3 "${base_path}/${script_folder}/collect_networks.py" "$id_network" "$id_format")
 
 if [ ${#network_list[@]} -eq 0 ]; then
     echo "No UUIDs found for the given parameters."
@@ -27,4 +32,4 @@ for network in "${network_list[@]}"; do
             done
         done
     done
-done | parallel --colsep ' ' --jobs 50 --progress --nice 10 "${base_path}/${script_folder}/launch_coopfight.sh" {1} {2} {3} {4}
+done | parallel --colsep ' ' --jobs 6 --progress --nice 10 "${base_path}/${script_folder}/launch_coopfight.sh" {1} {2} {3} {4}

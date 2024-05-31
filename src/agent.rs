@@ -29,30 +29,30 @@ pub struct Agent {
 
 impl Agent {
     pub fn new(
-        id: usize, 
-        neighbors: Vec<usize>, 
-        resources_initial: f64, 
+        id: usize,
+        neighbors: Vec<usize>,
+        resources_initial: f64,
         strategy: Strategy,
     ) -> Self {
-        Self { 
-            id, 
-            neighbors, 
-            resources_cumulative: resources_initial, 
-            resources_initial, 
+        Self {
+            id,
+            neighbors,
+            resources_cumulative: resources_initial,
+            resources_initial,
             resources_instant: 0.0,
-            strategy: strategy, 
+            strategy: strategy,
             strategy_temp: strategy,
-         }
+        }
     }
 }
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct AgentEnsemble {
-    inner: Vec<Agent>
+    inner: Vec<Agent>,
 }
 
 impl AgentEnsemble {
-    pub fn new( 
+    pub fn new(
         adjacency_list: &HashMap<usize, Vec<usize>>,
         fraction_cooperators: f64,
         fraction_defectors: f64,
@@ -67,11 +67,11 @@ impl AgentEnsemble {
         let weights = vec![fraction_cooperators, fraction_defectors, fraction_fighters];
         let dist = WeightedAliasIndex::new(weights).unwrap();
 
-        for id in 0..nagents  {
+        for id in 0..nagents {
             let neighbors = adjacency_list.get(&id).unwrap().clone();
-            
+
             let resources_init = 1.0;
-    
+
             let strategy = match dist.sample(&mut rng) {
                 0 => Strategy::Cooperator,
                 1 => Strategy::Defector,

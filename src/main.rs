@@ -1,8 +1,9 @@
-
 use std::env;
 
 use clap::Parser;
-use coopfight::{agent::ResourceDistributionModel, core::model_cooperation_and_fight, utils::Input};
+use coopfight::{
+    agent::ResourceDistributionModel, core::model_cooperation_and_fight, utils::Input,
+};
 
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
@@ -24,7 +25,7 @@ pub struct Args {
     #[clap(long, value_parser, default_value_t = 0.1)]
     pub fraction_investment: f64,
     //#[clap(long, value_parser, default_value_t = 1)]
-    //pub id_experiment: usize,    
+    //pub id_experiment: usize,
     //#[clap(long, value_parser, default_value = "")]
     //pub model_game: GameModel,
     //#[clap(long, value_parser, default_value = "")]
@@ -45,11 +46,7 @@ pub struct Args {
     pub payoff_defection: f64,
     #[clap(long, value_parser, default_value_t = 0.0)]
     pub rate_consumption: f64,
-    #[clap(
-        long,
-        value_parser,
-        default_value = "net_adl_nx100_ny100"
-    )]
+    #[clap(long, value_parser, default_value = "net_adl_lpb_nx100_ny100")]
     pub string_network: String,
     #[clap(long, value_parser, default_value_t = 1000)]
     pub t_average: usize,
@@ -77,11 +74,14 @@ fn main() {
         t_equilibrium: args.t_equilibrium,
     };
 
-    let path = env::current_dir()
-            .expect("Failed to get current directory")
-            .join("data")
-            .join("networks");
-    let path_network = path.join(args.string_network);
+    let current_dir = env::current_dir().expect("Failed to get current directory");
+    let path = current_dir
+        .parent()
+        .expect("Failed to get parent directory")
+        .join("netrust")
+        .join("data")
+        .join("networks");
+    let path_network = path.join(format!("{}.json", args.string_network));
 
     model_cooperation_and_fight(&model_pars, &path_network);
 }

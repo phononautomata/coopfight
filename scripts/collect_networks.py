@@ -120,8 +120,8 @@ def collect_filenames(path_base, id_network, id_format):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Collect network UUIDs for simulations.')
-    parser.add_argument('--id_network', choices=['BarabasiAlbert', 'Complete', 'Configuration', 'ConfigurationCorrelated', 'ConfigurationUncorrelated', 'ErdosRenyi', 'Lattice', 'LatticePBC', 'Regular', 'WattsStrogatz'], type=str, help='The network model id for which to collect samples')
-    parser.add_argument('--id_network', choices=['adjacency-list', 'adjacency-matrix', 'edge-list', 'netrust-object'], type=str, help='Network object format style')
+    parser.add_argument('id_network', choices=['BarabasiAlbert', 'Complete', 'Configuration', 'ConfigurationCorrelated', 'ConfigurationUncorrelated', 'ErdosRenyi', 'Lattice', 'LatticePBC', 'Regular', 'WattsStrogatz'], type=str, help='The network model id for which to collect samples')
+    parser.add_argument('id_format', choices=['adjacency-list', 'adjacency-matrix', 'edge-list', 'netrust-object'], type=str, help='Network object format style')
     args = parser.parse_args()
     
     id_network = args.id_network

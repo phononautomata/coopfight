@@ -2,33 +2,54 @@ use std::{collections::HashSet, env, path::PathBuf};
 
 use rand::Rng;
 
-use crate::{agent::{AgentEnsemble, Strategy}, utils::{assemble_events, construct_string_game, load_network, save_global_results, save_to_json, summary_stats_output, FightingEvent, Input, Output, OutputGlobal, TimeSeries}};
+use crate::{
+    agent::{AgentEnsemble, Strategy},
+    utils::{
+        assemble_events, construct_string_game, load_network, save_global_results, save_to_json,
+        summary_stats_output, FightingEvent, Input, Output, OutputGlobal, TimeSeries,
+    },
+};
 
 pub fn model_cooperation_and_fight(pars_model: &Input, path_network: &PathBuf) {
     let adjacency_list = load_network(path_network);
- 
+
     let mut output_ensemble: Vec<Output> = Vec::new();
 
-    for _ in 0..pars_model.nsims {
+    for sim in 0..pars_model.nsims {
+        println!(
+            "COOPFIGHT. Simulation {}, rho={}, b={}, gamma={}",
+            sim,
+            pars_model.fraction_investment,
+            pars_model.payoff_defection,
+            pars_model.parameter_technology
+        );
+
         let mut agent_ensemble = AgentEnsemble::new(
-            &adjacency_list, 
-            pars_model.fraction_cooperators, 
-            pars_model.fraction_defectors, 
+            &adjacency_list,
+            pars_model.fraction_cooperators,
+            pars_model.fraction_defectors,
             pars_model.model_distribution_resources,
         );
 
         let output: Output = dynamical_loop(&mut agent_ensemble, &pars_model);
 
+        println!(
+            "Global results: Avg cooperators={}, defectors={}, fighters={}",
+            output.global.fraction_cooperators,
+            output.global.fraction_cooperators,
+            output.global.fraction_fighters
+        );
+
         output_ensemble.push(output);
     }
-    
+
     let output_summary = summary_stats_output(&output_ensemble);
 
     let path = env::current_dir()
-            .expect("Failed to get current directory")
-            .join("results")
-            .join("curated");
-    
+        .expect("Failed to get current directory")
+        .join("results")
+        .join("curated");
+
     if pars_model.flag_analysis_event {
         let header = "coopfight_events";
         let string_game = format!("{}_{}", header, construct_string_game(&pars_model));
@@ -46,7 +67,12 @@ pub fn model_cooperation_and_fight(pars_model: &Input, path_network: &PathBuf) {
     }
 
     let path_game = path.to_str().unwrap();
-    let _ = save_global_results(&output_summary.global, &pars_model, path_game, adjacency_list.len());
+    let _ = save_global_results(
+        &output_summary.global,
+        &pars_model,
+        path_game,
+        adjacency_list.len(),
+    );
 
     println!("The game is over!");
 }
@@ -84,7 +110,7 @@ pub fn dynamical_loop(agent_ensemble: &mut AgentEnsemble, pars_model: &Input) ->
 
         for focal_agent in 0..nagents {
             agent_ensemble.inner_mut()[focal_agent].resources_instant = 0.0;
-    
+
             let focal_neighbors = agent_ensemble.inner()[focal_agent].neighbors.clone();
 
             let mut focal_nfighters = 0;
@@ -94,7 +120,7 @@ pub fn dynamical_loop(agent_ensemble: &mut AgentEnsemble, pars_model: &Input) ->
                     focal_nfighters += 1;
                 }
             }
-            
+
             for focal_neighbor in focal_neighbors {
                 let interaction_pair = if focal_agent < focal_neighbor {
                     (focal_agent, focal_neighbor)
@@ -108,11 +134,13 @@ pub fn dynamical_loop(agent_ensemble: &mut AgentEnsemble, pars_model: &Input) ->
 
                 interactions.insert(interaction_pair);
 
-                if agent_ensemble.inner()[focal_agent].strategy == Strategy::Fighter || 
-                agent_ensemble.inner()[focal_neighbor].strategy == Strategy::Fighter {
+                if agent_ensemble.inner()[focal_agent].strategy == Strategy::Fighter
+                    || agent_ensemble.inner()[focal_neighbor].strategy == Strategy::Fighter
+                {
+                    let focal_war_resources = pars_model.fraction_investment
+                        * agent_ensemble.inner()[focal_agent].resources_cumulative
+                        / focal_nfighters as f64;
 
-                    let focal_war_resources = pars_model.fraction_investment * agent_ensemble.inner()[focal_agent].resources_cumulative / focal_nfighters as f64;
-                    
                     let mut enemy_nfighters = 0;
                     let enemy_neighbors = &agent_ensemble.inner()[focal_neighbor].neighbors;
                     for enemy_neighbor in enemy_neighbors {
@@ -121,19 +149,29 @@ pub fn dynamical_loop(agent_ensemble: &mut AgentEnsemble, pars_model: &Input) ->
                         }
                     }
 
-                    let enemy_war_resources = pars_model.fraction_investment * agent_ensemble.inner()[focal_neighbor].resources_cumulative / enemy_nfighters as f64;
-                    
-                    let csf_probability = tullock_csf(focal_war_resources, enemy_war_resources, pars_model.parameter_technology);
+                    let enemy_war_resources = pars_model.fraction_investment
+                        * agent_ensemble.inner()[focal_neighbor].resources_cumulative
+                        / enemy_nfighters as f64;
+
+                    let csf_probability = tullock_csf(
+                        focal_war_resources,
+                        enemy_war_resources,
+                        pars_model.parameter_technology,
+                    );
 
                     let trial: f64 = rng.gen();
                     let winner: usize;
                     if trial < csf_probability {
-                        agent_ensemble.inner_mut()[focal_agent].resources_instant += enemy_war_resources;
-                        agent_ensemble.inner_mut()[focal_neighbor].resources_instant -= enemy_war_resources; 
+                        agent_ensemble.inner_mut()[focal_agent].resources_instant +=
+                            enemy_war_resources;
+                        agent_ensemble.inner_mut()[focal_neighbor].resources_instant -=
+                            enemy_war_resources;
                         winner = 0;
                     } else {
-                        agent_ensemble.inner_mut()[focal_agent].resources_instant -= focal_war_resources;
-                        agent_ensemble.inner_mut()[focal_neighbor].resources_instant -= focal_war_resources; 
+                        agent_ensemble.inner_mut()[focal_agent].resources_instant -=
+                            focal_war_resources;
+                        agent_ensemble.inner_mut()[focal_neighbor].resources_instant -=
+                            focal_war_resources;
                         winner = 1;
                     }
 
@@ -143,7 +181,8 @@ pub fn dynamical_loop(agent_ensemble: &mut AgentEnsemble, pars_model: &Input) ->
                         id_event: event_count,
                         investment_enemy: enemy_war_resources,
                         investment_focal: focal_war_resources,
-                        resources_enemy: agent_ensemble.inner()[focal_neighbor].resources_cumulative,
+                        resources_enemy: agent_ensemble.inner()[focal_neighbor]
+                            .resources_cumulative,
                         resources_focal: agent_ensemble.inner()[focal_agent].resources_cumulative,
                         strategy_enemy: agent_ensemble.inner()[focal_neighbor].strategy,
                         strategy_focal: agent_ensemble.inner()[focal_agent].strategy,
@@ -155,34 +194,44 @@ pub fn dynamical_loop(agent_ensemble: &mut AgentEnsemble, pars_model: &Input) ->
                 } else {
                     if agent_ensemble.inner()[focal_agent].strategy == Strategy::Cooperator {
                         if agent_ensemble.inner()[focal_neighbor].strategy == Strategy::Cooperator {
-                            agent_ensemble.inner_mut()[focal_agent].resources_instant += pars_model.payoff_cooperation;
-                            agent_ensemble.inner_mut()[focal_neighbor].resources_instant += pars_model.payoff_cooperation;
+                            agent_ensemble.inner_mut()[focal_agent].resources_instant +=
+                                pars_model.payoff_cooperation;
+                            agent_ensemble.inner_mut()[focal_neighbor].resources_instant +=
+                                pars_model.payoff_cooperation;
                         } else {
-                            agent_ensemble.inner_mut()[focal_neighbor].resources_instant += pars_model.payoff_defection;
+                            agent_ensemble.inner_mut()[focal_neighbor].resources_instant +=
+                                pars_model.payoff_defection;
                         }
-                    } else if agent_ensemble.inner()[focal_neighbor].strategy == Strategy::Cooperator {
-                        agent_ensemble.inner_mut()[focal_agent].resources_instant += pars_model.payoff_defection;
+                    } else if agent_ensemble.inner()[focal_neighbor].strategy
+                        == Strategy::Cooperator
+                    {
+                        agent_ensemble.inner_mut()[focal_agent].resources_instant +=
+                            pars_model.payoff_defection;
                     }
                 }
             }
         }
 
         for focal_agent in 0..nagents {
-            agent_ensemble.inner_mut()[focal_agent].resources_cumulative += agent_ensemble.inner()[focal_agent].resources_instant;  
+            agent_ensemble.inner_mut()[focal_agent].resources_cumulative +=
+                agent_ensemble.inner()[focal_agent].resources_instant;
         }
-       
+
         for focal_agent in 0..nagents {
             let nneighbors = agent_ensemble.inner()[focal_agent].neighbors.len();
             let focal_neighbor = rand::thread_rng().gen_range(0..nneighbors);
 
-            let resource_delta = agent_ensemble.inner()[focal_agent].resources_cumulative - agent_ensemble.inner()[focal_neighbor].resources_cumulative;
+            let resource_delta = agent_ensemble.inner()[focal_agent].resources_cumulative
+                - agent_ensemble.inner()[focal_neighbor].resources_cumulative;
             let fermi_probability = f64::exp(resource_delta / pars_model.parameter_noise);
 
             let trial: f64 = rng.gen();
             if trial < fermi_probability {
-                agent_ensemble.inner_mut()[focal_agent].strategy_temp = agent_ensemble.inner()[focal_neighbor].strategy;
+                agent_ensemble.inner_mut()[focal_agent].strategy_temp =
+                    agent_ensemble.inner()[focal_neighbor].strategy;
             } else {
-                agent_ensemble.inner_mut()[focal_agent].strategy_temp = agent_ensemble.inner()[focal_agent].strategy;
+                agent_ensemble.inner_mut()[focal_agent].strategy_temp =
+                    agent_ensemble.inner()[focal_agent].strategy;
             }
         }
 
@@ -191,35 +240,44 @@ pub fn dynamical_loop(agent_ensemble: &mut AgentEnsemble, pars_model: &Input) ->
                 Strategy::Cooperator => {
                     if t >= t_equilibrium {
                         avg_fraction_cooperators += 1.0;
-                        avg_payoff_cooperators += agent_ensemble.inner()[focal_agent].resources_cumulative;
+                        avg_payoff_cooperators +=
+                            agent_ensemble.inner()[focal_agent].resources_cumulative;
                     }
 
                     time_series_number_cooperators[t] += 1;
-                    time_series_payoff_cooperators[t] += agent_ensemble.inner()[focal_agent].resources_cumulative;
-                },
+                    time_series_payoff_cooperators[t] +=
+                        agent_ensemble.inner()[focal_agent].resources_cumulative;
+                }
                 Strategy::Defector => {
                     if t >= t_equilibrium {
                         avg_fraction_defectors += 1.0 / (nagents * t_equilibrium) as f64;
-                        avg_payoff_defectors += agent_ensemble.inner()[focal_agent].resources_cumulative;
+                        avg_payoff_defectors +=
+                            agent_ensemble.inner()[focal_agent].resources_cumulative;
                     }
 
                     time_series_number_defectors[t] += 1;
-                    time_series_payoff_defectors[t] += agent_ensemble.inner()[focal_agent].resources_cumulative;
-                },
+                    time_series_payoff_defectors[t] +=
+                        agent_ensemble.inner()[focal_agent].resources_cumulative;
+                }
                 Strategy::Fighter => {
                     if t >= t_equilibrium {
                         avg_fraction_fighters += 1.0;
-                        avg_payoff_fighters += agent_ensemble.inner()[focal_agent].resources_cumulative;
+                        avg_payoff_fighters +=
+                            agent_ensemble.inner()[focal_agent].resources_cumulative;
                     }
 
                     time_series_number_fighters[t] += 1;
-                    time_series_payoff_fighters[t] += agent_ensemble.inner()[focal_agent].resources_cumulative;
-                },
+                    time_series_payoff_fighters[t] +=
+                        agent_ensemble.inner()[focal_agent].resources_cumulative;
+                }
             }
 
-            agent_ensemble.inner_mut()[focal_agent].strategy = agent_ensemble.inner()[focal_agent].strategy_temp;
+            agent_ensemble.inner_mut()[focal_agent].strategy =
+                agent_ensemble.inner()[focal_agent].strategy_temp;
 
-            agent_ensemble.inner_mut()[focal_agent].resources_cumulative = agent_ensemble.inner()[focal_agent].resources_cumulative * (1.0 - pars_model.rate_consumption);
+            agent_ensemble.inner_mut()[focal_agent].resources_cumulative =
+                agent_ensemble.inner()[focal_agent].resources_cumulative
+                    * (1.0 - pars_model.rate_consumption);
         }
 
         t += 1;
