@@ -36,13 +36,13 @@ pub struct Args {
     pub model_distribution_resources: ResourceDistributionModel,
     #[clap(long, value_parser, default_value_t = 30)]
     pub nsims: usize,
-    #[clap(long, value_parser, default_value_t = 0.2)]
+    #[clap(long, value_parser, default_value_t = 0.1)]
     pub parameter_noise: f64,
     #[clap(long, value_parser, default_value_t = 0.5)]
     pub parameter_technology: f64,
     #[clap(long, value_parser, default_value_t = 1.0)]
     pub payoff_cooperation: f64,
-    #[clap(long, value_parser, default_value_t = 1.2)]
+    #[clap(long, value_parser, default_value_t = 1.4)]
     pub payoff_defection: f64,
     #[clap(long, value_parser, default_value_t = 0.1)]
     pub rate_consumption: f64,

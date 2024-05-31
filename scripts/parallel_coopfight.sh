@@ -23,13 +23,16 @@ fi
 fraction_investment=$(seq 0 0.05 1)
 payoff_defection=$(seq 1.0 0.05 2.0)
 parameter_technology=$(seq 0.0 0.05 1.0)
+rate_consumption=$(seq 0.0 0.1 1.0)
 
 for network in "${network_list[@]}"; do
     for rho in "${fraction_investment[@]}"; do
         for b in ${payoff_defection[@]}; do
             for gamma in ${parameter_technology[@]}; do
-                echo "$network" "$rho" $b $gamma
+                for alpha in ${rate_consumption[@]}; do
+                    echo "$network" "$rho" "$b" "$gamma" "$alpha"
+                done
             done
         done
     done
-done | parallel --colsep ' ' --jobs 6 --progress --nice 10 "${base_path}/${script_folder}/launch_coopfight.sh" {1} {2} {3} {4}
+done | parallel --colsep ' ' --jobs 6 --progress --nice 10 "${base_path}/${script_folder}/launch_coopfight.sh" {1} {2} {3} {4} {5}

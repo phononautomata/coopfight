@@ -1,7 +1,7 @@
 #!/bin/bash
 
-if [ "$#" -ne 4 ]; then
-    echo "Usage: $0 string_network fraction_investment payoff_defection parameter_technology"
+if [ "$#" -ne 5 ]; then
+    echo "Usage: $0 string_network fraction_investment payoff_defection parameter_technology rate_consumption"
     exit 1
 fi
 
@@ -9,12 +9,13 @@ string_network=$1
 fraction_investment=$2
 payoff_defection=$3
 parameter_technology=$4
+rate_consumption=$5
 
 fraction_cooperators=0.333
 fraction_defectors=0.333 
 model_distribution_resources="uniform"
 nsims=30
-parameter_noise=0.2
+parameter_noise=0.1
 payoff_cooperation=1.0
 t_average=1000
 t_equilibrium=10000

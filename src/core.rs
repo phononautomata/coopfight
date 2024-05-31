@@ -280,6 +280,8 @@ pub fn dynamical_loop(agent_ensemble: &mut AgentEnsemble, pars_model: &Input) ->
                     * (1.0 - pars_model.rate_consumption);
         }
 
+        println!("t={}, avg cooperators {}, defectors {}, fighters {}", t+1, avg_fraction_cooperators, avg_fraction_defectors, avg_fraction_fighters);
+
         t += 1;
     }
 
