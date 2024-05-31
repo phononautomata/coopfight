@@ -1,1 +1,0 @@
-/Users/alfonso/workshop/coopfight/target/release/libcoopfight.rlib: /Users/alfonso/workshop/coopfight/src/agent.rs /Users/alfonso/workshop/coopfight/src/core.rs /Users/alfonso/workshop/coopfight/src/lib.rs /Users/alfonso/workshop/coopfight/src/utils.rs
