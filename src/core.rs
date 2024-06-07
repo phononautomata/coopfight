@@ -5,7 +5,9 @@ use rand::Rng;
 use crate::{
     agent::{AgentEnsemble, Strategy},
     utils::{
-        assemble_events, assemble_global, construct_string_game, get_string_network, load_network, save_global_results, save_to_json, summary_stats_output, FightingEvent, Input, Output, OutputGlobal, TimeSeries
+        assemble_events, assemble_global, construct_string_game, get_string_network, load_network,
+        save_global_results, save_to_json, summary_stats_output, FightingEvent, Input, Output,
+        OutputGlobal, TimeSeries,
     },
 };
 
@@ -138,9 +140,10 @@ pub fn dynamical_loop(agent_ensemble: &mut AgentEnsemble, pars_model: &Input) ->
             match agent_ensemble.inner()[focal_agent].strategy {
                 Strategy::Cooperator => {
                     if t >= t_equilibrium {
-                        avg_fraction_cooperators += 1.0 / (nagents * t_average ) as f64;
-                        avg_payoff_cooperators +=
-                            agent_ensemble.inner()[focal_agent].resources_cumulative / t_average as f64;
+                        avg_fraction_cooperators += 1.0 / (nagents * t_average) as f64;
+                        avg_payoff_cooperators += agent_ensemble.inner()[focal_agent]
+                            .resources_cumulative
+                            / t_average as f64;
                     }
 
                     time_series_number_cooperators[t] += 1;
@@ -150,8 +153,9 @@ pub fn dynamical_loop(agent_ensemble: &mut AgentEnsemble, pars_model: &Input) ->
                 Strategy::Defector => {
                     if t >= t_equilibrium {
                         avg_fraction_defectors += 1.0 / (nagents * t_average) as f64;
-                        avg_payoff_defectors +=
-                            agent_ensemble.inner()[focal_agent].resources_cumulative / t_average as f64;
+                        avg_payoff_defectors += agent_ensemble.inner()[focal_agent]
+                            .resources_cumulative
+                            / t_average as f64;
                     }
 
                     time_series_number_defectors[t] += 1;
@@ -161,8 +165,9 @@ pub fn dynamical_loop(agent_ensemble: &mut AgentEnsemble, pars_model: &Input) ->
                 Strategy::Fighter => {
                     if t >= t_equilibrium {
                         avg_fraction_fighters += 1.0 / (nagents * t_average) as f64;
-                        avg_payoff_fighters +=
-                            agent_ensemble.inner()[focal_agent].resources_cumulative / t_average as f64;
+                        avg_payoff_fighters += agent_ensemble.inner()[focal_agent]
+                            .resources_cumulative
+                            / t_average as f64;
                     }
 
                     time_series_number_fighters[t] += 1;
@@ -307,22 +312,21 @@ pub fn dynamical_loop(agent_ensemble: &mut AgentEnsemble, pars_model: &Input) ->
         }
 
         for focal_agent in 0..nagents {
-            let nneighbors = agent_ensemble.inner()[focal_agent].neighbors.len();
-            let trial = rand::thread_rng().gen_range(0..nneighbors);
-            let focal_neighbor = agent_ensemble.inner()[focal_agent].neighbors[trial];
+            let focal_payoff = agent_ensemble.inner()[focal_agent].resources_cumulative;
+            let mut best_payoff = focal_payoff;
+            let mut best_strategy = agent_ensemble.inner()[focal_agent].strategy;
 
-            let resource_delta = agent_ensemble.inner()[focal_agent].resources_cumulative
-                - agent_ensemble.inner()[focal_neighbor].resources_cumulative;
-            let fermi_probability =
-                1.0 / (1.0 + f64::exp(resource_delta / pars_model.parameter_noise));
-            let trial: f64 = rng.gen();
-            if trial < fermi_probability {
-                agent_ensemble.inner_mut()[focal_agent].strategy_temp =
-                    agent_ensemble.inner()[focal_neighbor].strategy;
-            } else {
-                agent_ensemble.inner_mut()[focal_agent].strategy_temp =
-                    agent_ensemble.inner()[focal_agent].strategy;
+            let neighbors = agent_ensemble.inner()[focal_agent].neighbors.clone();
+
+            for focal_neighbor in neighbors {
+                let neighbor_payoff = agent_ensemble.inner()[focal_neighbor].resources_cumulative;
+                if neighbor_payoff > best_payoff {
+                    best_payoff = neighbor_payoff;
+                    best_strategy = agent_ensemble.inner()[focal_neighbor].strategy;
+                }
             }
+
+            agent_ensemble.inner_mut()[focal_agent].strategy_temp = best_strategy;
         }
 
         for focal_agent in 0..nagents {
@@ -366,9 +370,12 @@ pub fn dynamical_loop(agent_ensemble: &mut AgentEnsemble, pars_model: &Input) ->
         fraction_cooperators = time_series_number_cooperators[last_time] as f64 / nagents as f64;
         fraction_defectors = time_series_number_defectors[last_time] as f64 / nagents as f64;
         fraction_fighters = time_series_number_fighters[last_time] as f64 / nagents as f64;
-        payoff_cooperators = time_series_payoff_cooperators[last_time] / time_series_number_cooperators[last_time] as f64;
-        payoff_defectors = time_series_payoff_defectors[last_time] / time_series_number_defectors[last_time] as f64;
-        payoff_fighters = time_series_payoff_fighters[last_time] / time_series_number_fighters[last_time] as f64;
+        payoff_cooperators = time_series_payoff_cooperators[last_time]
+            / time_series_number_cooperators[last_time] as f64;
+        payoff_defectors = time_series_payoff_defectors[last_time]
+            / time_series_number_defectors[last_time] as f64;
+        payoff_fighters =
+            time_series_payoff_fighters[last_time] / time_series_number_fighters[last_time] as f64;
 
         for remaining_t in t..t_total {
             time_series_number_cooperators[remaining_t] = time_series_number_cooperators[last_time];
@@ -377,8 +384,8 @@ pub fn dynamical_loop(agent_ensemble: &mut AgentEnsemble, pars_model: &Input) ->
             time_series_payoff_cooperators[remaining_t] = time_series_payoff_cooperators[last_time];
             time_series_payoff_defectors[remaining_t] = time_series_payoff_defectors[last_time];
             time_series_payoff_fighters[remaining_t] = time_series_payoff_fighters[last_time];
-        }        
-    } else{
+        }
+    } else {
         fraction_cooperators = avg_fraction_cooperators;
         fraction_defectors = avg_fraction_defectors;
         fraction_fighters = avg_fraction_fighters;
@@ -416,4 +423,47 @@ pub fn tullock_csf(resource_focal: f64, resource_enemy: f64, parameter_technolog
     let x = f64::powf(resource_focal, parameter_technology);
     let y = f64::powf(resource_enemy, parameter_technology);
     x / (x + y)
+}
+
+pub fn update_rule_best(agent_ensemble: &mut AgentEnsemble, focal_agent: usize) {
+    let focal_payoff = agent_ensemble.inner()[focal_agent].resources_cumulative;
+    let mut best_payoff = focal_payoff;
+    let mut best_strategy = agent_ensemble.inner()[focal_agent].strategy;
+
+    let neighbors = agent_ensemble.inner()[focal_agent].neighbors.clone();
+
+    for focal_neighbor in neighbors {
+        let neighbor_payoff = agent_ensemble.inner()[focal_neighbor].resources_cumulative;
+        if neighbor_payoff > best_payoff {
+            best_payoff = neighbor_payoff;
+            best_strategy = agent_ensemble.inner()[focal_neighbor].strategy;
+        }
+    }
+
+    agent_ensemble.inner_mut()[focal_agent].strategy_temp = best_strategy;
+}
+
+pub fn update_rule_fermi(
+    agent_ensemble: &mut AgentEnsemble,
+    focal_agent: usize,
+    parameter_noise: f64,
+) {
+    let mut rng = rand::thread_rng();
+
+    let nneighbors = agent_ensemble.inner()[focal_agent].neighbors.len();
+    let trial = rand::thread_rng().gen_range(0..nneighbors);
+    let focal_neighbor = agent_ensemble.inner()[focal_agent].neighbors[trial];
+    let resource_delta = agent_ensemble.inner()[focal_agent].resources_cumulative
+        - agent_ensemble.inner()[focal_neighbor].resources_cumulative;
+
+    let fermi_probability = 1.0 / (1.0 + f64::exp(resource_delta / parameter_noise));
+
+    let trial: f64 = rng.gen();
+    if trial < fermi_probability {
+        agent_ensemble.inner_mut()[focal_agent].strategy_temp =
+            agent_ensemble.inner()[focal_neighbor].strategy;
+    } else {
+        agent_ensemble.inner_mut()[focal_agent].strategy_temp =
+            agent_ensemble.inner()[focal_agent].strategy;
+    }
 }
