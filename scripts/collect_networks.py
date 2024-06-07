@@ -6,6 +6,12 @@ import json
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(os.path.join(project_root, 'src'))
 
+try:
+    import utils as ut
+except ModuleNotFoundError:
+    print("Module 'utils' not found. Ensure 'utils.py' is in the 'src' directory and you're running this script from the correct directory.")
+    sys.exit(1)
+
 path_base = project_root
 
 def load_json_file(path_full):

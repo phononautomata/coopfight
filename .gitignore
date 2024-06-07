@@ -1,6 +1,10 @@
 .coopfight
-.pickle
-results/curated
-doc/
-data/
+*.pickle
+results/curated/*.json
+results/temp/*.json
+results/curated/*.csv
+results/temp/*.csv
+figures/temp/*.pdf
+figures/temp/*.png
+figures/plot/*.pdf
 target/

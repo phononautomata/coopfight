@@ -1,0 +1,13 @@
+{
+    "fraction_cooperators": 0.5,
+    "fraction_defectors": 0.5,
+    "fraction_investment": 0.1,
+    "model_distribution_resources": "Uniform",
+    "nsims": 10,
+    "parameter_noise": 0.1,
+    "parameter_technology": 0.5,
+    "payoff_defection": 1.0,
+    "rate_consumption": 1.0,
+    "t_average": 1000,
+    "t_equilibrium": 10000
+}

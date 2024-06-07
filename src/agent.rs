@@ -40,7 +40,7 @@ impl Agent {
             resources_cumulative: resources_initial,
             resources_initial,
             resources_instant: 0.0,
-            strategy: strategy,
+            strategy,
             strategy_temp: strategy,
         }
     }
@@ -95,5 +95,35 @@ impl AgentEnsemble {
 
     pub fn number_of_agents(&self) -> usize {
         self.inner.len()
+    }
+
+    pub fn number_of_cooperators(&self) -> usize {
+        let mut ncooperators = 0;
+        for (_, agent) in self.inner().iter().enumerate() {
+            if agent.strategy == Strategy::Cooperator {
+                ncooperators += 1;
+            }
+        }
+        ncooperators
+    }
+
+    pub fn number_of_defectors(&self) -> usize {
+        let mut ndefectors = 0;
+        for (_, agent) in self.inner().iter().enumerate() {
+            if agent.strategy == Strategy::Defector {
+                ndefectors += 1;
+            }
+        }
+        ndefectors
+    }
+
+    pub fn number_of_fighters(&self) -> usize {
+        let mut nfighters = 0;
+        for (_, agent) in self.inner().iter().enumerate() {
+            if agent.strategy == Strategy::Fighter {
+                nfighters += 1;
+            }
+        }
+        nfighters
     }
 }

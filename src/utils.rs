@@ -26,7 +26,9 @@ pub struct FightingEvent {
 
 #[derive(Serialize, Deserialize, Clone, Copy)]
 pub struct Input {
+    pub cutoff_resources: f64,
     pub flag_analysis_event: bool,
+    pub flag_analysis_global: bool,
     pub flag_analysis_time: bool,
     pub fraction_cooperators: f64,
     pub fraction_defectors: f64,
@@ -57,6 +59,16 @@ pub struct OutputGlobal {
     pub payoff_cooperators: f64,
     pub payoff_defectors: f64,
     pub payoff_fighters: f64,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct OutputGlobalAssembled {
+    pub fraction_cooperators: Vec<f64>,
+    pub fraction_defectors: Vec<f64>,
+    pub fraction_fighters: Vec<f64>,
+    pub payoff_cooperators: Vec<f64>,
+    pub payoff_defectors: Vec<f64>,
+    pub payoff_fighters: Vec<f64>,
 }
 
 #[derive(Serialize)]
@@ -95,6 +107,34 @@ pub fn assemble_events(output_ensemble: &Vec<Output>) -> Vec<&Vec<FightingEvent>
     }
 
     event_ensemble
+}
+
+pub fn assemble_global(output_ensemble: &Vec<Output>) -> OutputGlobalAssembled {
+    let nsims = output_ensemble.len();
+    let mut fraction_cooperators = vec![0.0; nsims];
+    let mut fraction_defectors = vec![0.0; nsims];
+    let mut fraction_fighters = vec![0.0; nsims];
+    let mut payoff_cooperators = vec![0.0; nsims];
+    let mut payoff_defectors = vec![0.0; nsims];
+    let mut payoff_fighters = vec![0.0; nsims];
+
+    for (sim, output) in output_ensemble.iter().enumerate() {
+        fraction_cooperators[sim] = output.global.fraction_cooperators;
+        fraction_defectors[sim] = output.global.fraction_defectors;
+        fraction_fighters[sim] = output.global.fraction_fighters;
+        payoff_cooperators[sim] = output.global.payoff_cooperators;
+        payoff_defectors[sim] = output.global.payoff_defectors;
+        payoff_fighters[sim] = output.global.payoff_fighters;
+    }
+
+    OutputGlobalAssembled {
+        fraction_cooperators,
+        fraction_defectors,
+        fraction_fighters,
+        payoff_cooperators,
+        payoff_defectors,
+        payoff_fighters,
+    }
 }
 
 pub fn construct_string_game(pars_input: &Input) -> String {
@@ -138,8 +178,16 @@ pub fn convert_string_to_location_seed_enum(
     }
 }
 
+pub fn get_string_network(path_network: &Path) -> Option<String> {
+    let file_name = path_network.file_name()?.to_str()?;
+
+    let string_network = file_name.strip_suffix(".json")?;
+
+    Some(string_network.to_string())
+}
+
 pub fn load_network(path_network: &PathBuf) -> HashMap<usize, Vec<usize>> {
-    let mut file = File::open(&path_network).expect("Failed to open file");
+    let mut file = File::open(path_network).expect("Failed to open file");
 
     let mut content = String::new();
     file.read_to_string(&mut content)

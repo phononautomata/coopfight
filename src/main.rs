@@ -8,12 +8,16 @@ use coopfight::{
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
 pub struct Args {
+    #[clap(long, value_parser, default_value_t = 0.001)]
+    pub cutoff_resources: f64,
     #[clap(long, value_parser, default_value_t = false)]
     pub flag_analysis_agent: bool,
     #[clap(long, value_parser, default_value_t = false)]
     pub flag_analysis_degree: bool,
     #[clap(long, value_parser, default_value_t = false)]
     pub flag_analysis_event: bool,
+    #[clap(long, value_parser, default_value_t = true)]
+    pub flag_analysis_global: bool,
     #[clap(long, value_parser, default_value_t = false)]
     pub flag_analysis_time: bool,
     #[clap(long, value_parser, default_value_t = false)]
@@ -22,7 +26,7 @@ pub struct Args {
     pub fraction_cooperators: f64,
     #[clap(long, value_parser, default_value_t = 0.333)]
     pub fraction_defectors: f64,
-    #[clap(long, value_parser, default_value_t = 0.1)]
+    #[clap(long, value_parser, default_value_t = 0.0)]
     pub fraction_investment: f64,
     //#[clap(long, value_parser, default_value_t = 1)]
     //pub id_experiment: usize,
@@ -34,7 +38,7 @@ pub struct Args {
     //pub model_imitation: ImitationModel,
     #[clap(long, value_parser, default_value = "uniform")]
     pub model_distribution_resources: ResourceDistributionModel,
-    #[clap(long, value_parser, default_value_t = 30)]
+    #[clap(long, value_parser, default_value_t = 1000)]
     pub nsims: usize,
     #[clap(long, value_parser, default_value_t = 0.1)]
     pub parameter_noise: f64,
@@ -42,7 +46,7 @@ pub struct Args {
     pub parameter_technology: f64,
     #[clap(long, value_parser, default_value_t = 1.0)]
     pub payoff_cooperation: f64,
-    #[clap(long, value_parser, default_value_t = 1.4)]
+    #[clap(long, value_parser, default_value_t = 1.0)]
     pub payoff_defection: f64,
     #[clap(long, value_parser, default_value_t = 0.1)]
     pub rate_consumption: f64,
@@ -50,7 +54,7 @@ pub struct Args {
     pub string_network: String,
     #[clap(long, value_parser, default_value_t = 1000)]
     pub t_average: usize,
-    #[clap(long, value_parser, default_value_t = 10000)]
+    #[clap(long, value_parser, default_value_t = 100000)]
     pub t_equilibrium: usize,
 }
 
@@ -58,7 +62,9 @@ fn main() {
     let args = Args::parse();
 
     let model_pars = Input {
+        cutoff_resources: args.cutoff_resources,
         flag_analysis_event: args.flag_analysis_event,
+        flag_analysis_global: args.flag_analysis_global,
         flag_analysis_time: args.flag_analysis_time,
         fraction_cooperators: args.fraction_cooperators,
         fraction_defectors: args.fraction_defectors,
