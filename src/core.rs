@@ -312,21 +312,22 @@ pub fn dynamical_loop(agent_ensemble: &mut AgentEnsemble, pars_model: &Input) ->
         }
 
         for focal_agent in 0..nagents {
-            let focal_payoff = agent_ensemble.inner()[focal_agent].resources_cumulative;
-            let mut best_payoff = focal_payoff;
-            let mut best_strategy = agent_ensemble.inner()[focal_agent].strategy;
+            let nneighbors = agent_ensemble.inner()[focal_agent].neighbors.len();
+            let trial = rand::thread_rng().gen_range(0..nneighbors);
+            let focal_neighbor = agent_ensemble.inner()[focal_agent].neighbors[trial];
 
-            let neighbors = agent_ensemble.inner()[focal_agent].neighbors.clone();
-
-            for focal_neighbor in neighbors {
-                let neighbor_payoff = agent_ensemble.inner()[focal_neighbor].resources_cumulative;
-                if neighbor_payoff > best_payoff {
-                    best_payoff = neighbor_payoff;
-                    best_strategy = agent_ensemble.inner()[focal_neighbor].strategy;
-                }
+            let resource_delta = agent_ensemble.inner()[focal_agent].resources_cumulative
+                - agent_ensemble.inner()[focal_neighbor].resources_cumulative;
+            let fermi_probability =
+                1.0 / (1.0 + f64::exp(resource_delta / pars_model.parameter_noise));
+            let trial: f64 = rng.gen();
+            if trial < fermi_probability {
+                agent_ensemble.inner_mut()[focal_agent].strategy_temp =
+                    agent_ensemble.inner()[focal_neighbor].strategy;
+            } else {
+                agent_ensemble.inner_mut()[focal_agent].strategy_temp =
+                    agent_ensemble.inner()[focal_agent].strategy;
             }
-
-            agent_ensemble.inner_mut()[focal_agent].strategy_temp = best_strategy;
         }
 
         for focal_agent in 0..nagents {
