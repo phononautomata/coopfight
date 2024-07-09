@@ -259,7 +259,9 @@ pub fn dynamical_loop(agent_ensemble: &mut AgentEnsemble, pars_model: &Input) ->
                         event_count += 1;
 
                         let event = FightingEvent {
+                            id_enemy: focal_neighbor,
                             id_event: event_count,
+                            id_focal: focal_agent,
                             investment_enemy: enemy_war_resources,
                             investment_focal: focal_war_resources,
                             resources_enemy: agent_ensemble.inner()[focal_neighbor]
