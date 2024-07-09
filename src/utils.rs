@@ -13,7 +13,9 @@ use crate::agent::{ResourceDistributionModel, Strategy};
 
 #[derive(Serialize, Deserialize, Clone, Copy)]
 pub struct FightingEvent {
+    pub id_enemy: usize,
     pub id_event: usize,
+    pub id_focal: usize,
     pub investment_enemy: f64,
     pub investment_focal: f64,
     pub resources_enemy: f64,
