@@ -14,9 +14,9 @@ pub struct Args {
     pub flag_analysis_agent: bool,
     #[clap(long, value_parser, default_value_t = false)]
     pub flag_analysis_degree: bool,
-    #[clap(long, value_parser, default_value_t = false)]
-    pub flag_analysis_event: bool,
     #[clap(long, value_parser, default_value_t = true)]
+    pub flag_analysis_event: bool,
+    #[clap(long, value_parser, default_value_t = false)]
     pub flag_analysis_global: bool,
     #[clap(long, value_parser, default_value_t = false)]
     pub flag_analysis_time: bool,
@@ -26,7 +26,7 @@ pub struct Args {
     pub fraction_cooperators: f64,
     #[clap(long, value_parser, default_value_t = 0.333)]
     pub fraction_defectors: f64,
-    #[clap(long, value_parser, default_value_t = 0.0)]
+    #[clap(long, value_parser, default_value_t = 0.1)]
     pub fraction_investment: f64,
     //#[clap(long, value_parser, default_value_t = 1)]
     //pub id_experiment: usize,
@@ -38,15 +38,15 @@ pub struct Args {
     //pub model_imitation: ImitationModel,
     #[clap(long, value_parser, default_value = "uniform")]
     pub model_distribution_resources: ResourceDistributionModel,
-    #[clap(long, value_parser, default_value_t = 1000)]
+    #[clap(long, value_parser, default_value_t = 1)]
     pub nsims: usize,
     #[clap(long, value_parser, default_value_t = 0.1)]
     pub parameter_noise: f64,
-    #[clap(long, value_parser, default_value_t = 0.5)]
+    #[clap(long, value_parser, default_value_t = 0.4)]
     pub parameter_technology: f64,
     #[clap(long, value_parser, default_value_t = 1.0)]
     pub payoff_cooperation: f64,
-    #[clap(long, value_parser, default_value_t = 1.0)]
+    #[clap(long, value_parser, default_value_t = 1.1)]
     pub payoff_defection: f64,
     #[clap(long, value_parser, default_value_t = 0.1)]
     pub rate_consumption: f64,
@@ -54,7 +54,7 @@ pub struct Args {
     pub string_network: String,
     #[clap(long, value_parser, default_value_t = 1000)]
     pub t_average: usize,
-    #[clap(long, value_parser, default_value_t = 100000)]
+    #[clap(long, value_parser, default_value_t = 10000)]
     pub t_equilibrium: usize,
 }
 
